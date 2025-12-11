@@ -123,6 +123,16 @@ func TestNewGitHubParserWithURL(t *testing.T) {
 			},
 			wantErr: assert.NoError,
 		},
+		{
+			name: "repo only",
+			url:  "https://git.host.com/repo.git",
+			want: &GitLabURL{
+				host:  "git.host.com",
+				owner: "",
+				repo:  "repo",
+			},
+			wantErr: assert.NoError,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
