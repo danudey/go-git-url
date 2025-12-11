@@ -109,6 +109,15 @@ func TestNewGitURL(t *testing.T) {
 			url:      "https://gitlab.com/kubescape/testing",
 			wantErr:  assert.NoError,
 		},
+		{
+			name:     "repo only",
+			fullURL:  "https://git.host.com/repo.git",
+			provider: "gitlab",
+			owner:    "",
+			repo:     "repo",
+			url:      "https://git.host.com/repo",
+			wantErr:  assert.NoError,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

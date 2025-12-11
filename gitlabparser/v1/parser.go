@@ -33,7 +33,9 @@ func (gl *GitLabURL) GetURL() *url.URL {
 	}
 }
 
-func IsHostGitLab(host string) bool { return strings.Contains(host, "gitlab") }
+func IsHostGitLab(host string) bool {
+	return strings.Contains(host, "gitlab") || strings.HasPrefix(host, "git.")
+}
 
 func (gl *GitLabURL) GetProvider() string    { return apis.ProviderGitLab.String() }
 func (gl *GitLabURL) GetHostName() string    { return gl.host }
@@ -66,8 +68,8 @@ func (gl *GitLabURL) Parse(fullURL string) error {
 	index := 0
 
 	splittedRepo := strings.FieldsFunc(parsedURL.Path, func(c rune) bool { return c == '/' }) // trim empty fields from returned slice
-	if len(splittedRepo) < 2 {
-		return fmt.Errorf("expecting <user>/<repo> in url path, received: '%s'", parsedURL.Path)
+	if len(splittedRepo) < 1 {
+		return fmt.Errorf("expecting <user>/<repo> or <repo> in url path, received: '%s'", parsedURL.Path)
 	}
 
 	// in gitlab <user>/<repo> are separated from blob/tree/raw with a -
