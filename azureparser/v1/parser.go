@@ -73,7 +73,7 @@ func (az *AzureURL) Parse(fullURL string) error {
 	if err != nil {
 		return err
 	}
-	az.host = parsedURL.Host
+	az.host = parsedURL.Hostname()
 
 	if strings.HasPrefix(az.host, "ssh") {
 		az.host = strings.TrimPrefix(az.host, "ssh.")

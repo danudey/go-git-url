@@ -63,7 +63,7 @@ func (gl *GitLabURL) Parse(fullURL string) error {
 		return err
 	}
 
-	gl.host = parsedURL.Host
+	gl.host = parsedURL.Hostname()
 
 	index := 0
 
