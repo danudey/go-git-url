@@ -145,7 +145,7 @@ func TestNewGitURL(t *testing.T) {
 			wantErr:  assert.NoError,
 		},
 		{
-			name:     "parse bitbucket ssh",
+			name:     "parse bitbucket ssh with protocol and port",
 			fullURL:  "ssh://git@bitbucket.org:22/matthyx/ks-testing-public.git",
 			provider: "bitbucket",
 			owner:    "matthyx",
@@ -240,6 +240,20 @@ func TestNewGitURL(t *testing.T) {
 			assert.Equal(t, tt.url, gh.GetURL().String())
 		})
 	}
+}
+
+func TestNewGitURL_GitLabSelfHostedCustomPort(t *testing.T) {
+	gitURL, err := NewGitURL("https://gitlab.host.com:8443/kubescape/testing")
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "gitlab", gitURL.GetProvider())
+	assert.Equal(t, "gitlab.host.com:8443", gitURL.GetHostName())
+	assert.Equal(t, "kubescape", gitURL.GetOwnerName())
+	assert.Equal(t, "testing", gitURL.GetRepoName())
+	assert.Equal(t, "https://gitlab.host.com:8443/kubescape/testing", gitURL.GetURL().String())
+	assert.Equal(t, "https://gitlab.host.com:8443/kubescape/testing.git", gitURL.GetHttpCloneURL())
 }
 
 func TestNewGitAPI(t *testing.T) {
