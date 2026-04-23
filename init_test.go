@@ -2,8 +2,12 @@ package giturl
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
+	gitlabparserv1 "github.com/kubescape/go-git-url/gitlabparser/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -283,6 +287,17 @@ func TestNewGitURL_GitLabSelfHostedCustomPort(t *testing.T) {
 	assert.Equal(t, "https://gitlab.host.com:8443/kubescape/testing.git", gitURL.GetHttpCloneURL())
 }
 
+func TestNewGitLabParserWithURL_IPv6HostPreservesBrackets(t *testing.T) {
+	gitURL, err := gitlabparserv1.NewGitLabParserWithURL("", "https://[2001:db8::1]/kubescape/testing")
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "[2001:db8::1]", gitURL.GetHostName())
+	assert.Equal(t, "https://[2001:db8::1]/kubescape/testing", gitURL.GetURL().String())
+	assert.Equal(t, "https://[2001:db8::1]/kubescape/testing.git", gitURL.GetHttpCloneURL())
+}
+
 func TestNewGitAPI(t *testing.T) {
 	fileText := "https://raw.githubusercontent.com/kubescape/go-git-url/master/files/file0.text"
 	var gitURL IGitAPI
@@ -353,4 +368,45 @@ func TestNewGitAPI(t *testing.T) {
 		gitURL, err = NewGitAPI("https://gitlab.host.com/kubescape/testing")
 		assert.NoError(t, err)
 	}
+}
+
+func TestNewGitAPI_AzureCustomPortAPIRequestsUseParsedPort(t *testing.T) {
+	requestTarget := make(chan string, 1)
+	originalTransport := http.DefaultTransport
+	http.DefaultTransport = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		select {
+		case requestTarget <- r.URL.Host:
+		default:
+		}
+		return &http.Response{
+			StatusCode: http.StatusBadGateway,
+			Status:     "502 Bad Gateway",
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader("blocked by test transport")),
+			Request:    r,
+		}, nil
+	})
+	defer func() {
+		http.DefaultTransport = originalTransport
+	}()
+
+	gitURL, err := NewGitAPI("https://dev.azure.com:8443/dwertent/ks-testing-public/_git/ks-testing-public")
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Error(t, gitURL.SetDefaultBranchName())
+
+	select {
+	case target := <-requestTarget:
+		assert.Equal(t, "dev.azure.com:8443", target)
+	default:
+		t.Fatal("expected Azure API request to use the test transport")
+	}
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
+	return f(r)
 }
