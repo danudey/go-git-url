@@ -37,6 +37,15 @@ func TestNewGitURL(t *testing.T) {
 			wantErr:  assert.NoError,
 		},
 		{
+			name:     "parse github with non-default port",
+			fullURL:  "https://github.com:8443/kubescape/go-git-url",
+			provider: "github",
+			owner:    "kubescape",
+			repo:     "go-git-url",
+			url:      "https://github.com/kubescape/go-git-url",
+			wantErr:  assert.NoError,
+		},
+		{
 			name:     "parse github www",
 			fullURL:  "https://www.github.com/kubescape/go-git-url",
 			provider: "github",
@@ -66,6 +75,15 @@ func TestNewGitURL(t *testing.T) {
 		{
 			name:     "parse github ssh with protocol and port",
 			fullURL:  "ssh://git@github.com:22/kubescape/go-git-url.git",
+			provider: "github",
+			owner:    "kubescape",
+			repo:     "go-git-url",
+			url:      "https://github.com/kubescape/go-git-url",
+			wantErr:  assert.NoError,
+		},
+		{
+			name:     "parse github ssh with protocol and non-default port",
+			fullURL:  "ssh://git@github.com:2222/kubescape/go-git-url.git",
 			provider: "github",
 			owner:    "kubescape",
 			repo:     "go-git-url",
@@ -147,6 +165,15 @@ func TestNewGitURL(t *testing.T) {
 		{
 			name:     "parse bitbucket ssh with protocol and port",
 			fullURL:  "ssh://git@bitbucket.org:22/matthyx/ks-testing-public.git",
+			provider: "bitbucket",
+			owner:    "matthyx",
+			repo:     "ks-testing-public",
+			url:      "https://bitbucket.org/matthyx/ks-testing-public",
+			wantErr:  assert.NoError,
+		},
+		{
+			name:     "parse bitbucket ssh with protocol and non-default port",
+			fullURL:  "ssh://git@bitbucket.org:2222/matthyx/ks-testing-public.git",
 			provider: "bitbucket",
 			owner:    "matthyx",
 			repo:     "ks-testing-public",
