@@ -22,6 +22,8 @@ func isDefaultPort(scheme, port string) bool {
 		return port == "80"
 	case "ssh", "git+ssh":
 		return port == "22"
+	case "git":
+		return port == "9418"
 	}
 	return false
 }
